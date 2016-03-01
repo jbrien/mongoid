@@ -5,14 +5,13 @@ sudo: false
 bundler_args: --without development
 
 rvm:
-  - 2.2
+  - 2.2.2
   - 2.3.0
   - jruby-9.0.0.0
 
 gemfile:
   - Gemfile
-  - gemfiles/rails41.gemfile
-  - gemfiles/rails42.gemfile
+  - gemfiles/rails5master.gemfile
 
 env:
   global:
