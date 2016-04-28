@@ -764,6 +764,92 @@ describe Mongoid::Contextual::Mongo do
         end
       end
 
+      context 'when the criteria has no sort' do
+
+        let(:criteria) do
+          Band.all
+        end
+
+        let(:context) do
+          described_class.new(criteria)
+        end
+
+
+        it 'applies a sort on _id' do
+          expect(context.send(method)).to eq(depeche_mode)
+        end
+
+        context 'when calling #last' do
+
+          it 'returns the last document, sorted by _id' do
+            expect(context.send(method)).to eq(depeche_mode)
+            expect(context.last).to eq(new_order)
+          end
+        end
+
+        context 'with option { sort: :none }' do
+
+          let(:opts) do
+            { id_sort: :none }
+          end
+
+          it 'does not apply the sort on _id' do
+            expect(context.send(method, opts)).to eq(depeche_mode)
+          end
+
+          context 'when calling #last' do
+
+            it 'does not apply a sort on _id' do
+              expect(context.send(method, opts)).to eq(depeche_mode)
+              expect(context.last(opts)).to eq(depeche_mode)
+            end
+          end
+        end
+      end
+
+      context 'when the criteria has a sort' do
+
+        let(:criteria) do
+          Band.desc(:name)
+        end
+
+        let(:context) do
+          described_class.new(criteria)
+        end
+
+
+        it 'applies the criteria sort' do
+          expect(context.send(method)).to eq(new_order)
+        end
+
+        context 'when calling #last' do
+
+          it 'applies the criteria sort' do
+            expect(context.send(method)).to eq(new_order)
+            expect(context.last).to eq(depeche_mode)
+          end
+        end
+
+        context 'with option { sort: :none }' do
+
+          let(:opts) do
+            { id_sort: :none }
+          end
+
+          it 'applies the criteria sort' do
+            expect(context.send(method, opts)).to eq(new_order)
+          end
+
+          context 'when calling #last' do
+
+            it 'applies the criteria sort' do
+              expect(context.send(method, opts)).to eq(new_order)
+              expect(context.last(opts)).to eq(depeche_mode)
+            end
+          end
+        end
+      end
+
       context "when using .sort" do
 
         let(:criteria) do

@@ -1060,6 +1060,69 @@ describe Mongoid::Attributes do
         expect(person.delayed_atomic_unsets).to be_empty
       end
     end
+
+    context "when the attribute is aliased" do
+
+      context 'when the database name is used' do
+
+        let(:person) do
+          Person.create(at: Time.now)
+        end
+
+        before do
+          person.remove_attribute(:at)
+        end
+
+        it "removes the attribute" do
+          expect(person.at).to be_nil
+        end
+
+        it "removes the key from the attributes hash" do
+          expect(person.has_attribute?(:at)).to be false
+        end
+
+        context "when saving after the removal" do
+
+          before do
+            person.save
+          end
+
+          it "persists the removal" do
+            expect(person.reload.has_attribute?(:at)).to be false
+          end
+        end
+      end
+
+      context 'when the alias is used' do
+
+        let(:person) do
+          Person.create(aliased_timestamp: Time.now)
+        end
+
+        before do
+          person.remove_attribute(:aliased_timestamp)
+        end
+
+        it "removes the attribute" do
+          expect(person.aliased_timestamp).to be_nil
+        end
+
+        it "removes the key from the attributes hash" do
+          expect(person.has_attribute?(:aliased_timestamp)).to be false
+        end
+
+        context "when saving after the removal" do
+
+          before do
+            person.save
+          end
+
+          it "persists the removal" do
+            expect(person.reload.has_attribute?(:aliased_timestamp)).to be false
+          end
+        end
+      end
+    end
   end
 
   describe "#respond_to?" do
@@ -1652,6 +1715,16 @@ describe Mongoid::Attributes do
 
   context 'when calling the attribute check method' do
 
+    context 'when the attribute is blank' do
+      let(:person) do
+        Person.create(title: '')
+      end
+
+      it 'returns false' do
+        expect(person.title?).to be(false)
+      end
+    end
+
     context 'when the attribute is localized' do
       let(:person) do
         Person.create(desc: 'localized')
@@ -1687,7 +1760,7 @@ describe Mongoid::Attributes do
       end
 
       it 'does not apply localization when checking the attribute' do
-        expect(person.name?).to be(false)
+        expect(person.username?).to be(false)
       end
     end
   end
